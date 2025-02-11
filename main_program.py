@@ -6,11 +6,7 @@
 
 import json
 import zmq
-'''
-TODO LIST
-- Task management system: Jira
-- Write unit testing
-'''
+
 
 
 def connect():
@@ -26,24 +22,26 @@ def connect():
     return socket
 
 
-def calculation_request(socket, project):
-    """
-    Sends requests to the microservice and receives response.
-    :param socket: ZeroMQ socket
-    :param project: Sod, Retaining wall, or labor costs
-    """
-    print(f"Sending request for {project} calculation...")
-    socket.send_string(project)        # Send project to server
-    response = socket.recv().decode()  # Receive result
-    print(f"Calculation result: {project}\n")
-
-
 def sod(socket):
     """
     ==Sod Calculator Sub Menu==
     Handles Sod UI and Calculation requests
     :param socket:  ZeroMQ socket
     """
+
+    sod_data = {
+        "Kentucky Blue": 1.52,
+        "Perennial Rye": 1.5,
+        "Bahia": 1.32,
+        "Buffalo": 1.3,
+        "Carpet": 1.28,
+        "Fine Fescue": 1.26,
+        "Fescue Mix": 1.20,
+        "Centipede": 1.01,
+        "St. Augustine": .98,
+        "Zoysia": .93,
+        "Bermuda": .92
+    }
 
     while True:
         print("\n[Sod Installation Calculator]")
@@ -55,12 +53,40 @@ def sod(socket):
         if choice == "Q":
             break
         elif choice == "1":
-            print("Enter lawn size in square feet (Length X Width): ")
-            length = input("Length: ")
-            width = input("Width: ")
-            socket.send(f"Sod {length, width}")
-            response = socket.recv().decode()
-            print(f"Sod Installation cost: {response}")
+            while True:
+                print("\n[Select Sod Variety")
+                print("Kentucky Blue: $1.52, Perennial Rye: $1.5, Bahia: $1.32, Buffalo: $1.3")
+                print("Carpet: $1.28, Fine Fescue: $1.26, Fescue Mix: $1.20, Centipede: $1.01,")
+                print("St. Augustine: $0.98, Zoysia: $0.93, Bermuda: $0.92")
+                # User input sod variety
+                variety = input("Enter Sod Variety: ")
+                # Error handler
+                if variety not in sod_data:
+                    print("Invalid sod variety, please try again.\n")
+                    continue
+                # Take user square footage
+                try:
+                    print("Enter lawn size in square feet (Length X Width): ")
+                    length = float(input("Lawn Length (feet): "))
+                    width = float(input("Lawn Width (feet): "))
+                    area = length * width
+                    cost = area * sod_data[variety]
+                except ValueError:
+                    print("Invalid input, please try again.\n")
+                    continue
+
+                print(f"This is your total for materials: ${cost}")
+                save = input(f"Would you like to save this sod project? (Y/N): ").strip().upper()
+                if save != "Y":
+                    return
+                else:
+                    print("Sending to Project Folder...")
+                    #socket.send_string(json.dumps({"Sod": sod_data}))
+                    #response = socket.recv().decode()
+                    #print(f"Total Sod Cost with labor included: {response}")
+                    print(f"Total Sod Cost with labor included: {cost * 1.5}") #Temp delete me
+                    return
+
         elif choice == "2":
             folder(socket)
         else:
@@ -73,9 +99,18 @@ def wall(socket):
     Handles retaining wall UI and Calculation requests
     :param socket:  ZeroMQ socket
     """
+
+    wall_data = {
+        "Cinder": 2,
+        "Small": 3,
+        "Interlocking Concrete": 4,
+        "Large": 6,
+        "Boulder Rock": 15
+    }
+
     while True:
-        print("\n[Retaining Wall Calculator]")
-        print("1. To Enter Retaining Wall information")
+        print("\n[Retaining Wall Installation Calculator]")
+        print("1. To Retaining Wall Installation information")
         print("2. Project Folder")
         print("Q. <- Go Back <-")
 
@@ -83,12 +118,38 @@ def wall(socket):
         if choice == "Q":
             break
         elif choice == "1":
-            print("Enter desired wall size in square feet (Length X height): ")
-            length = input("Length: ")
-            height = input("Height: ")
-            socket.send(f"Sod {length, height}")
-            response = socket.recv().decode()
-            print(f"Retaining Wall cost: {response}")
+            while True:
+                print("\n[Select Retaining Wall Variety")
+                print("Cinder: $2, Small: $4, Interlocking Concrete: $4, Large: $6, Boulder Rock: $15")
+                # User input sod variety
+                variety = input("Enter Retaining Wall Variety: ")
+                # Error handler
+                if variety not in wall_data:
+                    print("Invalid Retaining Wall variety, please try again.\n")
+                    continue
+                # Take user square footage
+                try:
+                    print("Enter Retaining Wall dimensions (Length X Height): ")
+                    length = float(input("Wall Length (feet): "))
+                    height = float(input("Wall Height (feet): "))
+                    area = length * height
+                    cost = area * wall_data[variety]
+                except ValueError:
+                    print("Invalid input, please try again.\n")
+                    continue
+
+                print(f"This is your total for materials: ${cost}")
+                save = input(f"Would you like to save this retaining wall project? (Y/N): ").strip().upper()
+                if save != "Y":
+                    return
+                else:
+                    print("Sending to Project Folder...")
+                    #socket.send_string(json.dumps({"Wall": wall_data}))
+                    #response = socket.recv().decode()
+                    #print(f"Total Retaining Wall cost with labor included: {response}")
+                    print(f"Total Retaining Wall cost with labor included: {cost * 1.6}")
+                    return
+
         elif choice == "2":
             folder(socket)
         else:
@@ -143,10 +204,11 @@ def labor(socket):
                 add_role = input("Do you want to enter another role? (Y/N): ").strip().upper()
                 if add_role != "Y":
                     print("Current Worker information: ", labor_data)
-                    save = input(f"Would you like to save this team? (Y/N): ")
+                    save = input(f"Would you like to save this team? (Y/N): ").strip().upper()
                     if save != "Y":
-                        ui(socket)
+                        return
                     else:
+                        print("Sending to Project Folder...")
                         socket.send_string(json.dumps({"Labor": labor_data}))
                         response = socket.recv().decode()
                         print(f"Total Labor Cost: {response}")
@@ -160,12 +222,52 @@ def labor(socket):
 
 def folder(socket):
     """
-    Brings user to their project folder
+    == Project Folder Sub-Menu==
+    Brings user to their project folder and displays backend data
     :param socket: ZeroMQ socket
     """
     while True:
         print("\n[Project Folder]")
-        break
+        print("1. View saved labor data")
+        print("2. View saved sod calculations")
+        print("3. View saved retaining wall calculations")
+        print("Q. <- Go Back <-")
+
+        choice = input("Enter a number or Q: ").strip().upper()
+
+        if choice == "Q":
+            break
+        elif choice == "1":
+            #socket.send_string("REQUEST_LABOR_DATA")
+            #response = socket.recv().decode()
+            print("\n[Saved Labor Data]")
+            #print(response if response else "No labor data saved yet.")
+            print("Total Worker Cost Per Hour: $150.00") # TEMP delete me
+            print("Total Crew Lead Cost Per Hour: $30.00")  # TEMP delete me
+            print("Total Supervisor Cost Per Hour: $50.00")  # TEMP delete me
+            print("Total Project Cost Per Hour: $230.00") # TEMP delete me
+            continue
+        elif choice == "2":
+            #socket.send_string("REQUEST_SOD_DATA")
+            #response = socket.recv().decode()
+            print("\n[Saved Sod Calculations]")
+            print("Sod Variety: Kentucky Blue Grass")  # TEMP delete me
+            print("Price Per Square Foot: $1.52")
+            print("Total Project Cost With Labor: $20,000.00")
+            #print(response if response else "No sod calculations saved yet.")
+            continue
+        elif choice == "3":
+            #socket.send_string("REQUEST_WALL_DATA")
+            #response = socket.recv().decode()
+            print("\n[Saved Retaining Wall Calculations]")
+            #print(response if response else "No retaining wall calculations saved yet.")
+            print("Price Per Square foot: $15") # TEMP delete me
+            print("Total Project Cost With Labor: $4,430") # TEMP delete me
+            continue
+        else:
+            print("Invalid input, please try again.\n")
+            continue
+
 
 
 def ui(socket):
