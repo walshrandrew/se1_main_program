@@ -1,10 +1,10 @@
 # ONID: walshand
 # Andrew Walsh
 # 2/10/2025
-#
-#
-import json
+# Landscape Calculator
 
+
+import json
 import zmq
 '''
 TODO LIST
@@ -40,6 +40,7 @@ def calculation_request(socket, project):
 
 def sod(socket):
     """
+    ==Sod Calculator Sub Menu==
     Handles Sod UI and Calculation requests
     :param socket:  ZeroMQ socket
     """
@@ -68,6 +69,7 @@ def sod(socket):
 
 def wall(socket):
     """
+    ==Retaining Wall Sub Menu==
     Handles retaining wall UI and Calculation requests
     :param socket:  ZeroMQ socket
     """
@@ -95,13 +97,14 @@ def wall(socket):
 
 def labor(socket):
     """
+    ==Labor Sub Menu==
     Handles labor and Calculation requests
     :param socket:  ZeroMQ socket
     """
     labor_data = {
-        "Worker": (0, 0.0),
-        "Crew Lead": (0, 0.0),
-        "Supervisor": (0, 0.0),
+        "Worker": (0, 0.00),
+        "Crew Lead": (0, 0.00),
+        "Supervisor": (0, 0.00),
     }
 
     while True:
@@ -110,13 +113,14 @@ def labor(socket):
         print("2. Project Folder")
         print("Q. <- Go Back <-")
 
+        # User Navigation
         choice = input("Enter a number or Q: ").strip().upper()
-
         if choice == "Q":
             break
+
         elif choice == "1":
             while True:
-                print("\nEnter worker details:")
+                print("\n[Worker details]")
                 print("Roles: Worker, Crew Lead, Supervisor")
                 # User picks a role then enters quantity for role
                 role = input("Role: ").strip().title()
@@ -125,6 +129,7 @@ def labor(socket):
                     print("Invalid Role. Please enter Worker, Crew Lead, or Supervisor.")
                     continue
 
+                # User Enters Data
                 try:
                     quantity = int(input(f"Enter quantity of {role}s: ").strip())
                     wage = float(input(f"Enter hourly wage for {role}: $").strip())
@@ -134,14 +139,18 @@ def labor(socket):
                     print("Invalid input, please try again.\n")
                     continue
 
-                more = input("Do you want to enter another role? (Y/N): ").strip().upper()
-                if more != "Y":
-                    ui(socket)
-
-            # Send labor_data as JSON
-            socket.send_string(json.dumps({"Labor": labor_data}))
-            response = socket.recv().decode()
-            print(f"Total Labor Cost: {response}")
+                # Loop again
+                add_role = input("Do you want to enter another role? (Y/N): ").strip().upper()
+                if add_role != "Y":
+                    print("Current Worker information: ", labor_data)
+                    save = input(f"Would you like to save this team? (Y/N): ")
+                    if save != "Y":
+                        ui(socket)
+                    else:
+                        socket.send_string(json.dumps({"Labor": labor_data}))
+                        response = socket.recv().decode()
+                        print(f"Total Labor Cost: {response}")
+                        return
 
         elif choice == "2":
             folder(socket)
@@ -176,8 +185,12 @@ def ui(socket):
         choice = input("Enter which project to calculate: ").strip().upper()
 
         if choice == "Q":
-            print("Goodbye!")
-            exit()
+            sure = input("\nAre you sure you want to quit? (Y/N): ")
+            if sure == "Y":
+                print("Landscape Calculator Closing")
+                exit()
+            else:
+                continue
         elif choice == "1":
             sod(socket)
         elif choice == "2":
