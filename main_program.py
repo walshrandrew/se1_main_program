@@ -8,7 +8,6 @@ import json
 import zmq
 
 
-
 def connect():
     """
     Initialize ZeroMQ environment and connect to server.
@@ -18,7 +17,7 @@ def connect():
     context = zmq.Context()
     # Request socket -> Reply socket (.REP)
     socket = context.socket(zmq.REQ)
-    socket.connect("tcp://localhost:5555")
+    socket.connect("tcp://localhost:5000")
     return socket
 
 
@@ -81,10 +80,9 @@ def sod(socket):
                     return
                 else:
                     print("Sending to Project Folder...")
-                    #socket.send_string(json.dumps({"Sod": sod_data}))
-                    #response = socket.recv().decode()
-                    #print(f"Total Sod Cost with labor included: {response}")
-                    print(f"Total Sod Cost with labor included: {cost * 1.5}") #Temp delete me
+                    socket.send_string(json.dumps({"Sod": sod_data}))
+                    response = socket.recv().decode()
+                    print(f"Total Sod Cost with labor included: {response}")
                     return
 
         elif choice == "2":
@@ -144,10 +142,9 @@ def wall(socket):
                     return
                 else:
                     print("Sending to Project Folder...")
-                    #socket.send_string(json.dumps({"Wall": wall_data}))
-                    #response = socket.recv().decode()
-                    #print(f"Total Retaining Wall cost with labor included: {response}")
-                    print(f"Total Retaining Wall cost with labor included: {cost * 1.6}")
+                    socket.send_string(json.dumps({"Wall": wall_data}))
+                    response = socket.recv().decode()
+                    print(f"Total Retaining Wall cost with labor included: {response}")
                     return
 
         elif choice == "2":
@@ -162,6 +159,7 @@ def labor(socket):
     Handles labor and Calculation requests
     :param socket:  ZeroMQ socket
     """
+
     labor_data = {
         "Worker": (0, 0.00),
         "Crew Lead": (0, 0.00),
@@ -169,7 +167,7 @@ def labor(socket):
     }
 
     while True:
-        print("\n[Manage workers]")
+        print("\n[Crew Manager]")
         print("1. To enter workers information")
         print("2. Project Folder")
         print("Q. <- Go Back <-")
@@ -180,39 +178,55 @@ def labor(socket):
             break
 
         elif choice == "1":
+            # User inputs Crew Name
             while True:
-                print("\n[Worker details]")
-                print("Roles: Worker, Crew Lead, Supervisor")
-                # User picks a role then enters quantity for role
-                role = input("Role: ").strip().title()
+                print("\n[Crew details]")
+                print("Welcome to your Crew manager. First, Assign a crew name, then assign your crew roles.")
+                crew_name = input("Enter Crew Name: ").strip()
+                if not crew_name:
+                    print("Invalid Crew Name, please enter a name.")
+                    return
 
-                if role not in labor_data:
-                    print("Invalid Role. Please enter Worker, Crew Lead, or Supervisor.")
-                    continue
+                # Crew Name gets stored in labor_package Dictionary
+                labor_package = {
+                    "Crew Name": crew_name,
+                    "Labor": labor_data
+                }
 
-                # User Enters Data
-                try:
-                    quantity = int(input(f"Enter quantity of {role}s: ").strip())
-                    wage = float(input(f"Enter hourly wage for {role}: $").strip())
-                    # Add input to labor_data dictionary
-                    labor_data[role] = (quantity, wage)
-                except ValueError:
-                    print("Invalid input, please try again.\n")
-                    continue
+                while True:
+                    print("\nRoles: Worker, Crew Lead, Supervisor")
 
-                # Loop again
-                add_role = input("Do you want to enter another role? (Y/N): ").strip().upper()
-                if add_role != "Y":
-                    print("Current Worker information: ", labor_data)
-                    save = input(f"Would you like to save this team? (Y/N): ").strip().upper()
-                    if save != "Y":
-                        return
-                    else:
-                        print("Sending to Project Folder...")
-                        socket.send_string(json.dumps({"Labor": labor_data}))
-                        response = socket.recv().decode()
-                        print(f"Total Labor Cost: {response}")
-                        return
+                    # User picks a role then enters quantity for role
+                    role = input("Role: ").strip().title()
+
+                    if role not in labor_data:
+                        print("Invalid Role. Please enter Worker, Crew Lead, or Supervisor.")
+                        continue
+
+                    # User Enters Data
+                    try:
+                        quantity = int(input(f"Enter quantity of {role}s: ").strip())
+                        wage = float(input(f"Enter hourly wage for {role}: $").strip())
+                        # Add input to labor_data dictionary
+                        labor_data[role] = (quantity, wage)
+                    except ValueError:
+                        print("Invalid input, please try again.\n")
+                        continue
+
+                    # Loop again
+                    add_role = input("Do you want to enter another role? (Y/N): ").strip().upper()
+                    if add_role != "Y":
+                        print("Current Worker information: ", labor_data)
+                        save = input(f"Would you like to save this team? (Y/N): ").strip().upper()
+                        if save != "Y":
+                            return
+                        else:
+                            # Send request to server.py
+                            print("Sending to Project Folder...")
+                            socket.send_string(json.dumps(labor_package))
+                            response = socket.recv().decode()
+                            print(f"Total Labor Cost: {response}")
+                            return
 
         elif choice == "2":
             folder(socket)
@@ -238,36 +252,35 @@ def folder(socket):
         if choice == "Q":
             break
         elif choice == "1":
-            #socket.send_string("REQUEST_LABOR_DATA")
-            #response = socket.recv().decode()
+            socket.send_string("REQUEST_LABOR_DATA") #update
+            response = socket.recv().decode()
             print("\n[Saved Labor Data]")
-            #print(response if response else "No labor data saved yet.")
-            print("Total Worker Cost Per Hour: $150.00") # TEMP delete me
-            print("Total Crew Lead Cost Per Hour: $30.00")  # TEMP delete me
-            print("Total Supervisor Cost Per Hour: $50.00")  # TEMP delete me
-            print("Total Project Cost Per Hour: $230.00") # TEMP delete me
+            if not response:
+                print("No labor data saved yet")
+            else:
+                print(f"Crew Name: {response['CrewName']}")
             continue
         elif choice == "2":
-            #socket.send_string("REQUEST_SOD_DATA")
-            #response = socket.recv().decode()
+            socket.send_string("REQUEST_SOD_DATA") #update
+            response = socket.recv().decode()
             print("\n[Saved Sod Calculations]")
-            print("Sod Variety: Kentucky Blue Grass")  # TEMP delete me
-            print("Price Per Square Foot: $1.52")
-            print("Total Project Cost With Labor: $20,000.00")
-            #print(response if response else "No sod calculations saved yet.")
+            if not response:
+                print("No labor data saved yet")
+            else:
+                print(f"Sod information: {response}")
             continue
         elif choice == "3":
-            #socket.send_string("REQUEST_WALL_DATA")
-            #response = socket.recv().decode()
+            socket.send_string("REQUEST_WALL_DATA") #update
+            response = socket.recv().decode()
             print("\n[Saved Retaining Wall Calculations]")
-            #print(response if response else "No retaining wall calculations saved yet.")
-            print("Price Per Square foot: $15") # TEMP delete me
-            print("Total Project Cost With Labor: $4,430") # TEMP delete me
+            if not response:
+                print("No labor data saved yet")
+            else:
+                print(f"Retaining wall information: {response}")
             continue
         else:
             print("Invalid input, please try again.\n")
             continue
-
 
 
 def ui(socket):
@@ -303,6 +316,7 @@ def ui(socket):
             folder(socket)
         else:
             print("Invalid input, please try again.")
+
 
 if __name__ == "__main__":
     print("\n[Welcome to Landscape Calculator!]\n")
