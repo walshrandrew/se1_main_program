@@ -45,8 +45,8 @@ The server receives the response from microservice A and sends it back to the ma
 Example of Data Flow
 User Input (main program): -> server -> Microservices -> server -> main program
 
-## Shinji's Microservice A
-**HOW TO REQUEST DATA**
+# Shinji's Microservice A
+###**HOW TO REQUEST DATA**
 - Connect to PORT:30000
 - Enter Customer information
 - send a JSON request with socket.send_json(request_reservation_json)
@@ -60,9 +60,9 @@ request_reservation_json = {
   }  
 }  
 ````  
-========================================================================
+
   
-**HOW TO RECEIVE DATA**
+###**HOW TO RECEIVE DATA**
 - Receive JSON data with receive_reservation_json = socket.recv_json()
 - Validate request structure contains "request"
 - Validate event is "reservationData"
@@ -79,9 +79,8 @@ response = {
   }  
 }  
 ```  
-========================================================================
   
-**UML**
+###**UML**
 
 
 
