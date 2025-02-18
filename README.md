@@ -46,15 +46,40 @@ Example of Data Flow
 User Input (main program): -> server -> Microservices -> server -> main program
 
 ## Shinji's Microservice A
-- **HOW TO REQUEST DATA**
-
-
-
-- **HOW TO RECEIVE DATA**
-
-
-
-- **UML**
+**HOW TO REQUEST DATA**
+- Connect to PORT:30000
+- Enter Customer information
+- send a JSON request with socket.send_json(request_reservation_json)
+request_reservation_json = {
+  "request": {
+     "event": "reservationData",
+     "body": {
+     "customerName": customer_name
+     }
+  }
+}
+  
+========================================================================
+  
+**HOW TO RECEIVE DATA**
+- Receive JSON data with receive_reservation_json = socket.recv_json()
+- Validate request structure contains "request"
+- Validate event is "reservationData"
+- Reads reservation CSV and filters by customer name
+- Sends back {response} with a_socket.send_json(response)
+response = {
+  "response": {
+  "event": "reservationData",
+  "body": {
+     "customerName": customer_name,
+     "history": reservation_history
+     }
+  }
+}
+  
+========================================================================
+  
+**UML**
 
 
 
