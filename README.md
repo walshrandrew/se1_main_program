@@ -44,3 +44,6 @@ The server receives the response from microservice A and sends it back to the ma
 
 Example of Data Flow
 User Input (main program): -> server -> Microservices -> server -> main program
+
+## Shinji's Microservice A
+
