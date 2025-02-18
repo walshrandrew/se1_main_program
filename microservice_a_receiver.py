@@ -9,6 +9,7 @@ a_socket.bind("tcp://*:30000")  # Microservice A listens on port 30000
 
 print("Microservice A is running and waiting for reservation requests...")
 
+RESERVATION_DATA = "../csv/reservation_data.csv"  # Path to the CSV file
 
 while True:
     # Receive JSON request from the main program
