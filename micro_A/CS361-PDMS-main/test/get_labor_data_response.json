@@ -1,0 +1,13 @@
+{
+    "response": {
+        "event": "getLaborData",
+        "body": {
+          "labor": {
+            "Worker": ["5","20"],
+            "CrewLead": ["1", "28"],
+            "Supervisor": ["1","32"]
+          }
+        },
+        "code": "200"
+    }
+}

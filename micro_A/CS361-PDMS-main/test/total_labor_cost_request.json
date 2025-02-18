@@ -1,0 +1,13 @@
+{
+    "request": {
+        "event": "getLaborCost",
+        "body": {
+            "labor":{
+                "Worker": ["6", "20"],
+                "CrewLeader": ["1", "25"],
+                "Supervisoer": ["1", "30"]
+            },
+            "duration": "2"
+        }
+    }
+}

@@ -1,0 +1,9 @@
+{
+    "response": {
+        "event": "getLaborCost",
+        "body": {
+            "ttlLaborCost": "350"
+        },
+        "code": "200"
+    }
+}
