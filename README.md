@@ -50,7 +50,7 @@ User Input (main program): -> server -> Microservices -> server -> main program
 - Connect to PORT:30000
 - Enter Customer information
 - send a JSON request with socket.send_json(request_reservation_json)
-```javascript{
+```javascript
 request_reservation_json = {  
   "request": {  
      "event": "reservationData",  
@@ -59,7 +59,7 @@ request_reservation_json = {
      }  
   }  
 }  
-}  
+````  
 ========================================================================
   
 **HOW TO RECEIVE DATA**
@@ -68,7 +68,7 @@ request_reservation_json = {
 - Validate event is "reservationData"
 - Reads reservation CSV and filters by customer name
 - Sends back {response} with a_socket.send_json(response)
-```javascript{
+```javascript
 response = {  
   "response": {  
   "event": "reservationData",  
@@ -78,7 +78,7 @@ response = {
      }  
   }  
 }  
-}  
+```  
 ========================================================================
   
 **UML**
