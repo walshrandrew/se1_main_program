@@ -68,7 +68,7 @@ request_reservation_json = {
 - Validate event is "reservationData"
 - Reads reservation CSV and filters by customer name
 - Sends back {response} with a_socket.send_json(response)
-```json
+```python
 response = {  
   "response": {  
   "event": "reservationData",  
