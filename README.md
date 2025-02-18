@@ -68,7 +68,7 @@ request_reservation_json = {
 - Validate event is "reservationData"
 - Reads reservation CSV and filters by customer name
 - Sends back {response} with a_socket.send_json(response)
-```python
+```javascript
 response = {  
   "response": {  
   "event": "reservationData",  
@@ -81,6 +81,7 @@ response = {
 ```  
   
 ### **UML**
+![alt text](https://github.com/adam-p/markdown-here/raw/master/src/common/images/icon48.png "Logo Title Text 1")
 
 
 
