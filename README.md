@@ -50,14 +50,14 @@ User Input (main program): -> server -> Microservices -> server -> main program
 - Connect to PORT:30000
 - Enter Customer information
 - send a JSON request with socket.send_json(request_reservation_json)
-request_reservation_json = {
-  "request": {
-     "event": "reservationData",
-     "body": {
-     "customerName": customer_name
-     }
-  }
-}
+request_reservation_json = {  
+  "request": {  
+     "event": "reservationData",  
+     "body": {  
+     "customerName": customer_name  
+     }  
+  }  
+}  
   
 ========================================================================
   
@@ -67,15 +67,15 @@ request_reservation_json = {
 - Validate event is "reservationData"
 - Reads reservation CSV and filters by customer name
 - Sends back {response} with a_socket.send_json(response)
-response = {
-  "response": {
-  "event": "reservationData",
-  "body": {
-     "customerName": customer_name,
-     "history": reservation_history
-     }
-  }
-}
+response = {  
+  "response": {  
+  "event": "reservationData",  
+  "body": {  
+     "customerName": customer_name,  
+     "history": reservation_history  
+     }  
+  }  
+}  
   
 ========================================================================
   
