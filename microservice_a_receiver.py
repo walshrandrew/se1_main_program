@@ -1,59 +1,101 @@
-import json
 import zmq
 import pandas as pd
 
 # Initialize ZeroMQ context
 context = zmq.Context()
 a_socket = context.socket(zmq.REP)
-a_socket.bind("tcp://*:30000")  # Microservice A listens on port 30000
-
+port = "tcp://*:30000"
+a_socket.bind(port)  # Microservice A listens on port 30000
 print("Microservice A is running and waiting for reservation requests...")
+RESERVATION_DATA = "./csv/reservation_data.csv"  # Path to the CSV file
 
-RESERVATION_DATA = "../csv/reservation_data.csv"  # Path to the CSV file
 
-while True:
-    # Receive JSON request from the main program
-    request = a_socket.recv_json()
+def validate_received_json(requests):
+    """
+    Validates the JSON request structure
+    :param requests: JSON input
+    :return: error if request was incorrect
+    """
+    if not isinstance(requests, dict) or "request" not in requests:
+        return {"error": "Invalid Request Format"}
 
-    # Validate request structure
-    if not isinstance(request, dict) or "request" not in request:
-        response = {"response": {"error": "Invalid request format"}}
-        a_socket.send_json(response)
-        continue
-
-    event = request["request"].get("event")
-    body = request["request"].get("body", {})
+    event = requests["request"].get("event")
+    body = requests["request"].get("body", {})
 
     if event != "reservationData" or "customerName" not in body:
-        response = {"response": {"error": "Invalid request event or missing customerName"}}
-        a_socket.send_json(response)
-        continue
+        return {"error": "Invalid request event or missing customerName"}
 
-    customer_name = body["customerName"]
-    reservation_history = []
+    return None  # No errors
 
-    # Read the reservation CSV and filter by customer name
+
+def construct_response_json(customer):
+    """
+    Reads reservation CSV and filters by customer name.
+    Constructs JSON response
+    :param customer: Customer's name to construct JSON response with
+    :return: Reservation Data
+    """
     try:
         df = pd.read_csv(RESERVATION_DATA, encoding="utf-8")
-        customer_reservations = df[df["Name"].str.strip() == customer_name]
+        customer_reservations = df[df["Name"].str.strip() == customer]
+        # If user enters incorrect customer name
+        if customer_reservations.empty:
+            return {"error": f"No reservations found for customer {customer}"}
         reservation_history = customer_reservations[["Date", "Time", "Number"]].to_dict(orient="records")
-
     except FileNotFoundError:
-        response = {"response": {"error": "Reservation data file not found"}}
-        a_socket.send_json(response)
-        continue
+        return {"error": "Reservation data file not found"}
 
-    # Construct response JSON
-    response = {
+    return {
         "response": {
             "event": "reservationData",
             "body": {
-                "customerName": customer_name,
-                "history": reservation_history
+                "customerName": customer,
+                "history": reservation_history if reservation_history else []
             }
         }
     }
 
-    # Send the JSON response back to the main program
-    a_socket.send_json(response)
-    print(f"Response sent was: {response}")
+
+def send_error_response(socket: object, error_message: str) -> dict:
+    """
+    Sends a properly formatted error response.
+    :rtype: str
+    :param socket: port listening on
+    :param error_message: JSON response
+    """
+    return {
+        "response": {
+            "event": "reservationData",
+            "body": {
+                "error": error_message,
+                "history": []
+            }
+        }
+    }
+
+
+def respond_json(socket, responses):
+    socket.send_json(responses)
+    print(f"Response sent was: {responses}")
+
+
+while True:
+    request = a_socket.recv_json()
+
+    # Validate request
+    error = validate_received_json(request)
+    if error:
+        respond_json(a_socket, send_error_response(a_socket, error["error"]))
+        continue
+
+    # Process request
+    customer_name = (request.get("request", {}).get("body", {}).get("customerName", ""))
+    response = construct_response_json(customer_name)
+
+    # Handle potential file errors
+    if "error" in response:
+        respond_json(a_socket, send_error_response(a_socket, response["error"]))
+        continue
+
+    # Send successful response
+    respond_json(a_socket, response)
