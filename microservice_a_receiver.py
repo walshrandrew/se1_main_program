@@ -7,7 +7,7 @@ a_socket = context.socket(zmq.REP)
 port = "tcp://*:30000"
 a_socket.bind(port)  # Microservice A listens on port 30000
 print("Microservice A is running and waiting for reservation requests...")
-RESERVATION_DATA = "./csv/reservation_data.csv"  # Path to the CSV file
+RESERVATION_DATA = "../csv/reservation_data.csv"  # Path to the CSV file
 
 
 def validate_received_json(requests):
@@ -37,11 +37,11 @@ def construct_response_json(customer):
     """
     try:
         df = pd.read_csv(RESERVATION_DATA, encoding="utf-8")
-        customer_reservations = df[df["Name"].str.strip() == customer]
+        res_cus = df[df["Name"].str.strip() == customer]
         # If user enters incorrect customer name
-        if customer_reservations.empty:
+        if res_cus.empty:
             return {"error": f"No reservations found for customer {customer}"}
-        reservation_history = customer_reservations[["Date", "Time", "Number"]].to_dict(orient="records")
+        res_his = res_cus[["Date", "Time", "Number"]].to_dict(orient="records")
     except FileNotFoundError:
         return {"error": "Reservation data file not found"}
 
@@ -50,7 +50,7 @@ def construct_response_json(customer):
             "event": "reservationData",
             "body": {
                 "customerName": customer,
-                "history": reservation_history if reservation_history else []
+                "history": res_his if res_his else []
             }
         }
     }
@@ -89,8 +89,8 @@ while True:
         continue
 
     # Process request
-    customer_name = (request.get("request", {}).get("body", {}).get("customerName", ""))
-    response = construct_response_json(customer_name)
+    cus_name = (request.get("request", {}).get("body", {}).get("customerName", ""))
+    response = construct_response_json(cus_name)
 
     # Handle potential file errors
     if "error" in response:
