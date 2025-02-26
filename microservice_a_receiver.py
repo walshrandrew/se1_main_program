@@ -89,13 +89,18 @@ while True:
         continue
 
     # Process request
-    cus_name = (request.get("request", {}).get("body", {}).get("customerName", ""))
+    cus_name = (
+        request.get("request", {}).get("body", {}).get("customerName", "")
+    )
     response = construct_response_json(cus_name)
 
     # Handle potential file errors
     if "error" in response:
-        respond_json(a_socket, send_error_response(a_socket, response["error"]))
+        respond_json(
+            a_socket, send_error_response(a_socket, response["error"])
+        )
         continue
 
     # Send successful response
     respond_json(a_socket, response)
+
