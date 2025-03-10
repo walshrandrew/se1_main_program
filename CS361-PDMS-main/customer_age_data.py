@@ -7,9 +7,9 @@
 # version: 0.1
 
 import csv
-from microservice_a.usecase.base_usecase import BaseUsecase
-from microservice_a.constants import Constants
-from microservice_a.exceptions import DbNotFoundException
+from base_usecase import BaseUsecase
+from constants import Constants
+from exceptions import DbNotFoundException
 
 class CustomerAgeDataUsecase(BaseUsecase):
     def execute(self):

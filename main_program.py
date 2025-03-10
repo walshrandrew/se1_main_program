@@ -189,8 +189,14 @@ def labor(socket):
 
                 # Crew Name gets stored in labor_package Dictionary
                 labor_package = {
-                    "Crew Name": crew_name,
-                    "Labor": labor_data
+                    "request": {
+                        "event": "postLaborData",
+                        "body": {
+                            "crewName": crew_name,
+                            "labor": labor_data
+                        }
+                    }
+
                 }
 
                 while True:
@@ -224,8 +230,12 @@ def labor(socket):
                             # Send request to server.py
                             print("Sending to Project Folder...")
                             socket.send_string(json.dumps(labor_package))
-                            response = socket.recv().decode()
-                            print(f"Total Labor Cost: {response}")
+                            response = socket.recv_json()
+                            code = response.get("response", {}).get("code")
+                            if code == "200":
+                                print("Save successful!")
+                            else:
+                                print("Error: Save unsuccessful.")
                             return
 
         elif choice == "2":

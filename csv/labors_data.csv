@@ -1,1 +1,4 @@
-crewName, type, num, wage
+crewName,type,num,wage
+Bobbys,Worker,10,18.0
+Bobbys,Crew Lead,2,26.0
+Bobbys,Supervisor,1,30.0

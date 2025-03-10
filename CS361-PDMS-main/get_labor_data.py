@@ -7,8 +7,9 @@
 # version: 0.1
 
 import csv
-from microservice_a.usecase.base_usecase import BaseUsecase
-from microservice_a.constants import Constants
+from base_usecase import BaseUsecase
+from constants import Constants
+
 
 class GetLaborDataUsecase(BaseUsecase):
     def execute(self):

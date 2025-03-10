@@ -1,5 +1,5 @@
 import time
-import zmq # For zeroMQ
+import zmq  # For zeroMQ
 
 # context sets up environment so we can create sockets
 context = zmq.Context()
@@ -25,24 +25,25 @@ while True:
     request = main_socket.recv_json()
     print(f"Received request from main program: {request}")
     # Read JSON data package for event type like getLaborCost
-    service = request.get("event")
+    service = request.get("request").get("event")
+    print(f"Event type received: {service}")
 
     # Request microservice A to get labor cost
-    if service == "getLaborCost": # total labor cost X duration
-        a_socket.send_json(request)
+    if service == "getLaborCost":  # total labor cost X duration
         print(f"Forwarding {request} to microservice A")
+        a_socket.send_json(request)
         response = a_socket.recv_json()
         print(f"Received response from microserviceA {response}")
 
-    elif service == "getLaborData": # Reads CSV file for labor data
-        a_socket.send_json(request)
+    elif service == "getLaborData":  # Reads CSV file for labor data
         print(f"Forwarding {request} to microservice A")
+        a_socket.send_json(request)
         response = a_socket.recv_json()
         print(f"Received response from microserviceA {response}")
 
-    elif service == "postLaborData": # Writes to CSV file for labor data (will call this when user inputs labor data)
-        a_socket.send_json(request)
+    elif service == "postLaborData":  # Writes to CSV file for labor data (will call this when user inputs labor data)
         print(f"Forwarding {request} to microservice A")
+        a_socket.send_json(request)
         response = a_socket.recv_json()
         print(f"Received response from microserviceA {response}")
 

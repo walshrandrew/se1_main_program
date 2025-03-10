@@ -6,15 +6,15 @@
 # Description: Controller
 # version: 0.1
 
-import os
 import json
 import zmq
 from constants import *
-from usecase.customer_age_data import CustomerAgeDataUsecase
-from usecase.get_labor_cost import GetLaborCostUsecase
-from usecase.post_labor_data import PostLaborDataUsecase
-from usecase.get_labor_data import GetLaborDataUsecase
+from customer_age_data import CustomerAgeDataUsecase
+from get_labor_cost import GetLaborCostUsecase
+from post_labor_data import PostLaborDataUsecase
+from get_labor_data import GetLaborDataUsecase
 from exceptions import InvalidEventException
+
 
 class Controller:
     def __init__(self):
@@ -35,7 +35,7 @@ class Controller:
 
         while True:
             # clear a terminal
-            os.system('clear')
+            # os.system('clear')
 
             # receive a request
             request = json.loads(socket.recv())
@@ -85,6 +85,7 @@ class Controller:
             }
         }
         return response
+
 
 if __name__ == "__main__":
     controller = Controller()

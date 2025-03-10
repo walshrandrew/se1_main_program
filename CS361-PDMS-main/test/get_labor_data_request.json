@@ -1,8 +1,0 @@
-{
-    "request": {
-        "event": "getLaborData",
-        "body": {
-            "crewName": "Andrew"
-        }
-    }
-}
