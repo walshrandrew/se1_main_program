@@ -10,7 +10,7 @@ import zmq
 
 def connect():
     """
-    Initialize ZeroMQ environment and connect to server.
+    Initialize ZeroMQ environment and connect server.
     :return: socket
     """
     # set up env and create socket
