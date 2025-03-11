@@ -57,11 +57,23 @@ while True:
         response = b_socket.recv_json()
         print(f"Received {response} from microservice B")
 
+    elif service == "postSodCalc":
+        print(f"Forwarding {request} to microservice B")
+        b_socket.send_json(request)
+        response = b_socket.recv_json()
+        print(f"Received {response} from microservice B")
+
     # Request microservice C to ...
     elif service == "getRWCalc":
         print(f"Forwarding {request} to microservice C")
         c_socket.send_json(request)
         response = c_socket.recv_json()
+        print(f"Received {response} from microservice C")
+
+    elif service == "postRWCalc":
+        print(f"Forwarding {request} to microservice C")
+        b_socket.send_json(request)
+        response = b_socket.recv_json()
         print(f"Received {response} from microservice C")
 
     # Request microservice D to ...

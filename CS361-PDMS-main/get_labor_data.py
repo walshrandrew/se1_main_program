@@ -28,6 +28,7 @@ class GetLaborDataUsecase(BaseUsecase):
         try:
             with open(Constants.CSV_LABOR_DATA, 'r') as csvfile:
                 reader = csv.reader(csvfile)
+                print("read success!")
                 next(reader) # skip a header
 
                 for row in reader:

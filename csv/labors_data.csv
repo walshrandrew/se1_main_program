@@ -1,4 +1,4 @@
 crewName,type,num,wage
-Bobbys,Worker,10,18.0
-Bobbys,Crew Lead,2,26.0
-Bobbys,Supervisor,1,30.0
+Crew,Worker,10,5.0
+Crew,Crew Lead,0,0.0
+Crew,Supervisor,0,0.0

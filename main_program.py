@@ -74,15 +74,49 @@ def sod(socket):
                     print("Invalid input, please try again.\n")
                     continue
 
-                print(f"This is your total for materials: ${cost}")
-                save = input(f"Would you like to save this sod project? (Y/N): ").strip().upper()
+                print(f"This is your total cost for materials: ${cost}")
+
+                # Enter duration and send to microB
+                duration = input(f"Please enter total estimated project duration in hours: ").strip()
+                crew_name = input(f"Please enter the Crew's Name that will perform the project: ").strip()
+
+                # Now we skip Microservice A and go directly to Microservice B
+                project_data = {
+                    "request": {
+                        "event": "getSodCalc",
+                        "body": {
+                            "sod_variety": variety,
+                            "crewName": crew_name,
+                            "project_duration": duration,
+                            "material_cost": cost
+                        }
+                    }
+                }
+
+                socket.send_json(project_data)
+                total_project_cost = socket.recv_json()
+                print(f"This is your total project cost with materials, labor, and project duration: {total_project_cost}")
+
+                # Send to microB to save to sod_projects.csv
+                save = input(f"Would you like to save this project? (Y/N): ").strip().upper()
+                save_request = {
+                    "request": {
+                        "event": "postSodCalc",
+                        "body": {}  # No additional body is required, microserviceB will use the global state.
+                    }
+                }
                 if save != "Y":
                     return
                 else:
+                    # Send request to server.py
                     print("Sending to Project Folder...")
-                    socket.send_string(json.dumps({"Sod": sod_data}))
-                    response = socket.recv().decode()
-                    print(f"Total Sod Cost with labor included: {response}")
+                    socket.send_json(save_request)
+                    response = socket.recv_json()
+                    code = response.get("response", {}).get("code")
+                    if code == "200":
+                        print("Save successful!")
+                    else:
+                        print("Error: Save unsuccessful.")
                     return
 
         elif choice == "2":
@@ -247,7 +281,7 @@ def labor(socket):
 def folder(socket):
     """
     == Project Folder Sub-Menu==
-    Brings user to their project folder and displays backend data
+    Brings user to their project folder and displays backend data.
     :param socket: ZeroMQ socket
     """
     while True:
@@ -262,32 +296,90 @@ def folder(socket):
         if choice == "Q":
             break
         elif choice == "1":
-            socket.send_string("REQUEST_LABOR_DATA") #update
-            response = socket.recv().decode()
+            # Send JSON request to the server for labor data
+            request = {
+                "request": {
+                    "event": "getCrewList",
+                    "body": {}
+                }
+            }
+            socket.send_json(request)  # Sending request as JSON
+            response = socket.recv_json()  # Receiving JSON response
+
             print("\n[Saved Labor Data]")
-            if not response:
-                print("No labor data saved yet")
+            if not response or "crew_list" not in response:
+                print("No labor data saved yet.")
             else:
-                print(f"Crew Name: {response['CrewName']}")
+                # Assuming the response contains a list of crews or other details
+                for crew in response.get("crew_list", []):
+                    print(f"Crew Name: {crew}")
+
+                while True:
+                    print("1. Edit Crew")
+                    print("2. Delete Crew")
+                    print("Q. <- Go Back <-")
+                    csv_changes = input("Enter a 1 or 2 or Q: ").strip().upper()
+                    if csv_changes == "1":
+                        request = {
+                            "request": {
+                                "event": "editCrew",
+                                "body": {}
+                            }
+                        }
+                        socket.send_json(request)
+                    elif csv_changes == "2":
+                        crew_name = input(f"Input Crew Name to Delete: ").strip()
+                        request = {
+                            "request": {
+                                "event": "deleteCrew",
+                                "body": {"crewName": crew_name}
+                            }
+                        }
+                        socket.send_json(request)
+                    elif csv_changes == "Q":
+                        break
+                    else:
+                        print("Invalid input, please try again.\n")
+                        continue
+
             continue
+
         elif choice == "2":
-            socket.send_string("REQUEST_SOD_DATA") #update
-            response = socket.recv().decode()
+            # Send JSON request to the server for sod data
+            request = {
+                "request": {
+                    "event": "getSodCalc",
+                    "body": {}
+                }
+            }
+            socket.send_json(request)  # Sending request as JSON
+            response = socket.recv_json()  # Receiving JSON response
+
             print("\n[Saved Sod Calculations]")
             if not response:
-                print("No labor data saved yet")
+                print("No sod data saved yet.")
             else:
                 print(f"Sod information: {response}")
             continue
+
         elif choice == "3":
-            socket.send_string("REQUEST_WALL_DATA") #update
-            response = socket.recv().decode()
+            # Send JSON request to the server for retaining wall data
+            request = {
+                "request": {
+                    "event": "getRWCalc",
+                    "body": {}
+                }
+            }
+            socket.send_json(request)  # Sending request as JSON
+            response = socket.recv_json()  # Receiving JSON response
+
             print("\n[Saved Retaining Wall Calculations]")
             if not response:
-                print("No labor data saved yet")
+                print("No retaining wall data saved yet.")
             else:
                 print(f"Retaining wall information: {response}")
             continue
+
         else:
             print("Invalid input, please try again.\n")
             continue
