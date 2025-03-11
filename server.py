@@ -8,14 +8,17 @@ main_socket = context.socket(zmq.REP)
 # Address string. This is where socket listens on network port.
 main_socket.bind("tcp://*:5000")
 
-a_socket = context.socket(zmq.REQ)
+a_socket = context.socket(zmq.REQ)        # Labor data
 a_socket.connect("tcp://localhost:5555")  # connect to microservice A
 
-b_socket = context.socket(zmq.REQ)
-b_socket.connect("tcp://localhost:5556")  # connect to microservice A
+b_socket = context.socket(zmq.REQ)        # Sod calculator
+b_socket.connect("tcp://localhost:5556")  # connect to microservice B
 
-c_socket = context.socket(zmq.REQ)
-c_socket.connect("tcp://localhost:5557")  # connect to microservice A
+c_socket = context.socket(zmq.REQ)        # Retaining wall calculator
+c_socket.connect("tcp://localhost:5557")  # connect to microservice C
+
+d_socket = context.socket(zmq.REQ)        # Project management for "My folder"
+d_socket.connect("tcp://localhost:5558")  # connect to microservice D
 
 print("Server listening...")
 
@@ -48,8 +51,38 @@ while True:
         print(f"Received response from microserviceA {response}")
 
     # Request microservice B to ...
+    elif service == "getSodCalc":
+        print(f"Forwarding {request} to microservice B")
+        b_socket.send_json(request)
+        response = b_socket.recv_json()
+        print(f"Received {response} from microservice B")
 
     # Request microservice C to ...
+    elif service == "getRWCalc":
+        print(f"Forwarding {request} to microservice C")
+        c_socket.send_json(request)
+        response = c_socket.recv_json()
+        print(f"Received {response} from microservice C")
+
+    # Request microservice D to ...
+    elif service == "getCrewList":
+        print(f"Forwarding {request} to microservice D")
+        d_socket.send_json(request)
+        response = d_socket.recv_json()
+        print(f"Received {response} from microservice D")
+
+    elif service == "editCrew":
+        print(f"Forwarding {request} to microservice D")
+        d_socket.send_json(request)
+        response = d_socket.recv_json()
+        print(f"Received {response} from microservice D")
+
+    elif service == "deleteCrew":
+        print(f"Forwarding {request} to microservice D")
+        d_socket.send_json(request)
+        response = d_socket.recv_json()
+        print(f"Received {response} from microservice D")
+
     else:
         print("Invalid Request Received...")
         continue

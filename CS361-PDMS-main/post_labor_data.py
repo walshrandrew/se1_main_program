@@ -10,6 +10,7 @@ import csv
 from base_usecase import BaseUsecase
 from constants import Constants
 
+
 class PostLaborDataUsecase(BaseUsecase):
     def execute(self):
         """
