@@ -8,13 +8,11 @@ context = zmq.Context()
 c_socket = context.socket(zmq.REP)
 c_socket.bind("tcp://*:5557")
 
-print("Microservice C is running and waiting for reservation requests...")
-
 rw_file = '../csv/sod_project.csv'
 labor_file = '../csv/labors_data.csv'
 last_project_details = None
 
-print("Microservice B is running and waiting for reservation requests...")
+print("Microservice C is running and waiting for reservation requests...")
 
 
 def calculate_project_cost(data):
@@ -30,7 +28,7 @@ def calculate_project_cost(data):
     """
     try:
         body = data["request"]["body"]
-        sod_variety = body["sod_variety"]
+        wall_variety = body["wall_variety"]
         crew = body["crewName"]
         duration = float(body["project_duration"])
         material_cost = float(body["material_cost"])
@@ -61,7 +59,7 @@ def calculate_project_cost(data):
     # Save details for potential later saving.
     global last_project_details
     last_project_details = {
-        "sod_variety": sod_variety,
+        "wall_variety": wall_variety,
         "crew": crew,
         "project_duration": duration,
         "project_total_cost": total_project_cost
@@ -81,7 +79,7 @@ def save_project():
 
     try:
         with open(rw_file, 'a', newline='') as csvfile:
-            fieldnames = ["sod_variety", "crew", "project_duration", "project_total_cost"]
+            fieldnames = ["wall_variety", "crew", "project_duration", "project_total_cost"]
             writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
             if not rw_file:
                 writer.writeheader()

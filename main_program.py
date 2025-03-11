@@ -171,14 +171,45 @@ def wall(socket):
                     continue
 
                 print(f"This is your total for materials: ${cost}")
+
+                # Enter duration and send to microC
+                duration = input(f"Please enter total estimated project duration in hours: ").strip()
+                crew_name = input(f"Please enter the Crew's Name that will perform the project: ").strip()
+                project_data = {
+                    "request": {
+                        "event": "getRWCalc",
+                            "body": {
+                                "wall_variety": variety,
+                                "crewName": crew_name,
+                                "project_duration": duration,
+                                "material_cost": cost
+                        }
+                    }
+                }
+                socket.send_json(project_data)
+                total_project_cost = socket.recv_json()
+                print(f"This is your total project cost with materials, labor, and project duration: {total_project_cost}")
+
+                # Send to microC to save to rw_projects.csv
                 save = input(f"Would you like to save this retaining wall project? (Y/N): ").strip().upper()
+                save_request = {
+                    "request": {
+                        "event": "postRWCalc",
+                        "body": {}
+                    }
+                }
                 if save != "Y":
                     return
                 else:
+                    # Send request to server.py
                     print("Sending to Project Folder...")
-                    socket.send_string(json.dumps({"Wall": wall_data}))
-                    response = socket.recv().decode()
-                    print(f"Total Retaining Wall cost with labor included: {response}")
+                    socket.send_json(save_request)
+                    response = socket.recv_json()
+                    code = response.get("response", {}).get("code")
+                    if code == "200":
+                        print("Save successful!")
+                    else:
+                        print("Error: Save unsuccessful.")
                     return
 
         elif choice == "2":
@@ -287,8 +318,8 @@ def folder(socket):
     while True:
         print("\n[Project Folder]")
         print("1. View saved labor data")
-        print("2. View saved sod calculations")
-        print("3. View saved retaining wall calculations")
+        print("2. View saved sod projects")
+        print("3. View saved retaining wall projects")
         print("Q. <- Go Back <-")
 
         choice = input("Enter a number or Q: ").strip().upper()
