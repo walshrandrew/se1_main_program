@@ -15,7 +15,7 @@ b_socket = context.socket(zmq.REQ)        # Sod calculator
 b_socket.connect("tcp://localhost:5556")  # connect to microservice B
 
 c_socket = context.socket(zmq.REQ)        # Retaining wall calculator
-c_socket.connect("tcp://localhost:5557")  # connect to microservice C
+c_socket.connect("tcp://localhost:5577")  # connect to microservice C
 
 d_socket = context.socket(zmq.REQ)        # Project management for "My folder"
 d_socket.connect("tcp://localhost:5558")  # connect to microservice D
@@ -72,8 +72,8 @@ while True:
 
     elif service == "postRWCalc":
         print(f"Forwarding {request} to microservice C")
-        b_socket.send_json(request)
-        response = b_socket.recv_json()
+        c_socket.send_json(request)
+        response = c_socket.recv_json()
         print(f"Received {response} from microservice C")
 
     # Request microservice D to ...

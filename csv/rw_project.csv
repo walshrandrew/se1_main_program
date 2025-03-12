@@ -1,1 +1,3 @@
-rw_variety,project_duration,project_total_cost,crew
+rw_variety,crew,project_duration,project_total_cost,
+Cinder,Wall Crew,10.0,5630.0
+Small,Wall Crew,3.0,1989.0

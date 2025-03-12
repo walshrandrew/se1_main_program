@@ -6,6 +6,7 @@
 
 import json
 import zmq
+import csv
 
 
 def connect():
@@ -179,7 +180,7 @@ def wall(socket):
                     "request": {
                         "event": "getRWCalc",
                             "body": {
-                                "wall_variety": variety,
+                                "rw_variety": variety,
                                 "crewName": crew_name,
                                 "project_duration": duration,
                                 "material_cost": cost
@@ -376,43 +377,33 @@ def folder(socket):
             continue
 
         elif choice == "2":
-            # Send JSON request to the server for sod data
-            request = {
-                "request": {
-                    "event": "getSodCalc",
-                    "body": {}
-                }
-            }
-            socket.send_json(request)  # Sending request as JSON
-            response = socket.recv_json()  # Receiving JSON response
-
-            print("\n[Saved Sod Calculations]")
-            if not response:
-                print("No sod data saved yet.")
-            else:
-                print(f"Sod information: {response}")
+            data = []
+            file = 'csv/sod_project.csv'
+            try:
+                with open(file, 'r') as csvfile:
+                    csv_reader = csv.reader(csvfile)
+                    for row in csv_reader:
+                        data.append(row)
+                print("\n[Saved Sod Projects]")
+                print(data)
+            except FileNotFoundError:
+                print(f"Error: no sod data saved yet.")
+                return None
             continue
 
         elif choice == "3":
-            # Send JSON request to the server for retaining wall data
-            request = {
-                "request": {
-                    "event": "getRWCalc",
-                    "body": {}
-                }
-            }
-            socket.send_json(request)  # Sending request as JSON
-            response = socket.recv_json()  # Receiving JSON response
-
-            print("\n[Saved Retaining Wall Calculations]")
-            if not response:
-                print("No retaining wall data saved yet.")
-            else:
-                print(f"Retaining wall information: {response}")
-            continue
-
-        else:
-            print("Invalid input, please try again.\n")
+            data = []
+            file = 'csv/rw_project.csv'
+            try:
+                with open(file, 'r') as csvfile:
+                    csv_reader = csv.reader(csvfile)
+                    for row in csv_reader:
+                        data.append(row)
+                print("\n[Saved Retaining Wall Projects]")
+                print(data)
+            except FileNotFoundError:
+                print(f"Error: no sod data saved yet.")
+                return None
             continue
 
 

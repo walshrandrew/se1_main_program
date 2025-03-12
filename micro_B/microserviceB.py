@@ -1,7 +1,6 @@
 import zmq
 import csv
 import json
-import os
 
 context = zmq.Context()
 b_socket = context.socket(zmq.REP)
@@ -11,7 +10,7 @@ sod_file = '../csv/sod_project.csv'
 labor_file = '../csv/labors_data.csv'
 last_project_details = None
 
-print("Microservice B is running and waiting for reservation requests...")
+print("Microservice B is running and waiting for requests...")
 
 
 def calculate_project_cost(data):
@@ -53,7 +52,7 @@ def calculate_project_cost(data):
         return {"error": "Failed to read labors_data.csv: " + str(e)}
 
     total_labor_cost = sum_labor * duration
-    total_project_cost = total_labor_cost * material_cost
+    total_project_cost = total_labor_cost + material_cost
 
     # Save details for potential later saving.
     global last_project_details
@@ -90,29 +89,26 @@ def save_project():
 
 
 while True:
+    try:
+        message = b_socket.recv()
         try:
-            message = b_socket.recv()
-            try:
-                # Attempt to decode the message as JSON.
-                data = json.loads(message.decode('utf-8'))
-            except Exception:
-                # If decoding fails, treat the message as a plain string (save request).
-                data = message.decode('utf-8')
+            # Attempt to decode the message as JSON.
+            data = json.loads(message.decode('utf-8'))
+        except Exception:
+            # If decoding fails, treat the message as a plain string (save request).
+            data = message.decode('utf-8')
 
-            if isinstance(data, dict) and "request" in data:
-                event = data["request"].get("event")
-                if event == "getSodCalc":
-                    response = calculate_project_cost(data)
-                    b_socket.send_json(response)
-                elif event == "postSodCalc":
-                    response = save_project()
-                    b_socket.send_json(response)
-                else:
-                    b_socket.send_json({"error": "Unknown event"})
-            else:
-                # If not a calculation request, treat as a save request.
+        if isinstance(data, dict) and "request" in data:
+            event = data["request"].get("event")
+            if event == "getSodCalc":
+                response = calculate_project_cost(data)
+                b_socket.send_json(response)
+            elif event == "postSodCalc":
                 response = save_project()
                 b_socket.send_json(response)
-        except Exception as e:
-            error_response = {"error": str(e)}
-            b_socket.send_json(error_response)
+            else:
+                b_socket.send_json({"error": "Unknown event"})
+
+    except Exception as e:
+        error_response = {"error": str(e)}
+        b_socket.send_json(error_response)
